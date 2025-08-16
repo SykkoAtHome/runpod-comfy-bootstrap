@@ -45,7 +45,3 @@ pip install -r "${COMFY_DIR}/requirements.txt" || true
 for req in "${NODES_DIR}"/*/requirements.txt; do
   [ -f "$req" ] && pip install -r "$req" || true
 done
-
-# optional: start ComfyUI here
-# nohup python "${COMFY_DIR}/main.py" --listen 0.0.0.0 --port 8188 > "${WORKDIR}/logs/comfyui.log" 2>&1 &
-
