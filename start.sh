@@ -21,8 +21,9 @@ run_module() {
 }
 
 echo "[bootstrap] installing prerequisites..."
-pip install --upgrade huggingface_hub
-apt-get update && apt-get install -y git aria2 unzip curl
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y git aria2 unzip curl rsync procps
+python3 -m pip install --upgrade huggingface_hub
 
 # Ensure ComfyUI repository exists
 COMFY_DIR="${WORKDIR}/ComfyUI"
