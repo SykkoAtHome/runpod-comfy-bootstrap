@@ -22,7 +22,7 @@ run_module() {
 
 echo "[bootstrap] installing prerequisites..."
 pip install --upgrade huggingface_hub
-apt-get update && apt-get install -y git aria2 unzip
+apt-get update && apt-get install -y git aria2 unzip curl
 
 run_module "01_jupyter.sh"
 run_module "02_workspace.sh"
