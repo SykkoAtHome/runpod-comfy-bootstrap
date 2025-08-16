@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# =========[ MODUŁ 01: JUPYTER ]=========
 JUPYTER_PORT="${JUPYTER_PORT:-8888}"
 JUPYTER_TOKEN="${JUPYTER_TOKEN:-changeme}"
 WORKDIR="${WORKDIR:-/workspace}"
@@ -11,8 +10,7 @@ mkdir -p "$LOGDIR"
 ensure_python_tools() {
   python3 - <<'PY'
 import sys, subprocess
-def pipi(pkgs): subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", *pkgs])
-pipi(["pip","setuptools","wheel"])
+subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
 PY
 }
 
@@ -21,9 +19,9 @@ install_jupyter_if_needed() {
 import importlib, sys, subprocess
 try:
     importlib.import_module("jupyterlab")
-    print("[Jupyter] jupyterlab już zainstalowany.")
+    print("[Jupyter] jupyterlab already installed.")
 except ImportError:
-    print("[Jupyter] instaluję jupyterlab…")
+    print("[Jupyter] installing jupyterlab...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "jupyterlab"])
 PY
 }
@@ -34,11 +32,11 @@ is_jupyter_running() {
 
 start_jupyter() {
   if is_jupyter_running; then
-    echo "[Jupyter] już działa na porcie ${JUPYTER_PORT}."
+    echo "[Jupyter] already running on port ${JUPYTER_PORT}."
     return
   fi
 
-  echo "[Jupyter] startuję na porcie ${JUPYTER_PORT}…"
+  echo "[Jupyter] starting on port ${JUPYTER_PORT}..."
   nohup jupyter lab \
     --ip=0.0.0.0 \
     --port="${JUPYTER_PORT}" \
@@ -47,11 +45,10 @@ start_jupyter() {
     --allow-root \
     >"${LOGDIR}/jupyter.log" 2>&1 &
   sleep 1
-  echo "[Jupyter] logi: ${LOGDIR}/jupyter.log"
+  echo "[Jupyter] logs: ${LOGDIR}/jupyter.log"
 }
 
-# main
 ensure_python_tools
 install_jupyter_if_needed
 start_jupyter
-# =========[ /MODUŁ 01 ]=========
+
