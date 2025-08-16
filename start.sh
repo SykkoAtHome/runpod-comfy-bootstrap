@@ -21,6 +21,11 @@ run_module () {
   fi
 }
 
+# ====== PREREQUISITES ======
+echo "[bootstrap] instaluję wymagane narzędzia..."
+pip install --upgrade huggingface_hub
+apt-get update && apt-get install -y git aria2 unzip
+
 # ====== KOLEJNOŚĆ MODUŁÓW ======
 run_module "01_jupyter.sh"
 run_module "02_workspace.sh"
