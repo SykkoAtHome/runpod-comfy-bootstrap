@@ -12,3 +12,6 @@ hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/text_encoders/umt5_xxl_fp
 
 # CLIP
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/clip_vision/clip_vision_h.safetensors::clip_vision
+
+# UPSCALE
+https://huggingface.co/gemasai/4x_NMKD-Siax_200k/resolve/main/4x_NMKD-Siax_200k.pth::upscale_models
