@@ -40,8 +40,8 @@ fi
 
 # requirements
 echo "[nodes] installing Python dependencies..."
-pip install --upgrade pip wheel setuptools
-pip install -r "${COMFY_DIR}/requirements.txt" || true
+python3 -m pip install --upgrade pip wheel setuptools
+python3 -m pip install -r "${COMFY_DIR}/requirements.txt" || true
 for req in "${NODES_DIR}"/*/requirements.txt; do
-  [ -f "$req" ] && pip install -r "$req" || true
+  [ -f "$req" ] && python3 -m pip install -r "$req" || true
 done
