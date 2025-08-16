@@ -1,3 +1,12 @@
+https://github.com/crystian/comfyui-crystools.git
 https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 https://github.com/kijai/ComfyUI-KJNodes.git
-https://github.com/black-forest-labs/mxToolkit.git
+https://github.com/chflame163/ComfyUI_LayerStyle.git
+https://github.com/shiimizu/ComfyUI-TiledDiffusion.git
+https://github.com/rgthree/rgthree-comfy.git
+https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
+https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git
+https://github.com/yolain/ComfyUI-Easy-Use.git
+https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git
+https://github.com/Fannovel16/comfyui_controlnet_aux.git

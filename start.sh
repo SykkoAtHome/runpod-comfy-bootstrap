@@ -1,35 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ====== USTAWIENIA PODSTAWOWE ======
 WORKDIR="${WORKDIR:-/workspace}"
 REPO_DIR="${REPO_DIR:-${WORKDIR}/runpod-comfy-bootstrap}"
 LOGDIR="${LOGDIR:-${WORKDIR}/logs}"
 mkdir -p "$LOGDIR"
 
-echo "[bootstrap] START (repo: $REPO_DIR)"
+echo "[bootstrap] start (repo: $REPO_DIR)"
 
-# Funkcja do bezpiecznego wykonywania modułów
-run_module () {
+# Run modules safely
+run_module() {
   local m="$1"
   if [ -x "${REPO_DIR}/modules/${m}" ]; then
-    echo "[bootstrap] >>> uruchamiam moduł: ${m}"
+    echo "[bootstrap] >>> running module: ${m}"
     "${REPO_DIR}/modules/${m}"
-    echo "[bootstrap] <<< moduł ${m} OK"
+    echo "[bootstrap] <<< module ${m} done"
   else
-    echo "[bootstrap] (pominięto) brak modułu: ${m}"
+    echo "[bootstrap] (skipped) missing module: ${m}"
   fi
 }
 
-# ====== PREREQUISITES ======
-echo "[bootstrap] instaluję wymagane narzędzia..."
-pip install --upgrade huggingface_hub
-apt-get update && apt-get install -y git aria2 unzip
+echo "[bootstrap] installing prerequisites..."
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y git aria2 unzip curl rsync procps
+python3 -m pip install --upgrade huggingface_hub
 
-# ====== KOLEJNOŚĆ MODUŁÓW ======
+# Ensure ComfyUI repository exists
+COMFY_DIR="${WORKDIR}/ComfyUI"
+if [ ! -d "${COMFY_DIR}/.git" ]; then
+  echo "[bootstrap] cloning ComfyUI..."
+  git clone https://github.com/comfyanonymous/ComfyUI.git "${COMFY_DIR}"
+else
+  echo "[bootstrap] ComfyUI already present"
+fi
+
 run_module "01_jupyter.sh"
 run_module "02_workspace.sh"
 run_module "03_custom_nodes.sh"
 run_module "04_models.sh"
 
-echo "[bootstrap] WSZYSTKIE MODUŁY WYSTARTOWAŁY ✅"
+echo "[bootstrap] all modules started ✅"
+
