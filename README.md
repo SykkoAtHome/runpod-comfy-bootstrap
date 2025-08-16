@@ -17,3 +17,12 @@ The script installs prerequisites and runs four modules:
 
 Edit `config/custom_nodes.txt` and `config/models.txt` to customize what gets installed.
 
+
+## Launch ComfyUI
+
+The bootstrap script does not start ComfyUI automatically. Launch it manually:
+
+```
+bash -lc 'cd /workspace/ComfyUI && python main.py --listen 0.0.0.0 --port 8188'
+```
+
