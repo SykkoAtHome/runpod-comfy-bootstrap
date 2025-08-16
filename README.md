@@ -1,1 +1,1 @@
-"# runpod" 
+bash -lc 'cd /workspace && rm -rf runpod-comfy-bootstrap && git clone https://github.com/SykkoAtHome/runpod-comfy-bootstrap.git && bash runpod-comfy-bootstrap/start.sh'
