@@ -24,6 +24,15 @@ echo "[bootstrap] installing prerequisites..."
 pip install --upgrade huggingface_hub
 apt-get update && apt-get install -y git aria2 unzip curl
 
+# Ensure ComfyUI repository exists
+COMFY_DIR="${WORKDIR}/ComfyUI"
+if [ ! -d "${COMFY_DIR}/.git" ]; then
+  echo "[bootstrap] cloning ComfyUI..."
+  git clone https://github.com/comfyanonymous/ComfyUI.git "${COMFY_DIR}"
+else
+  echo "[bootstrap] ComfyUI already present"
+fi
+
 run_module "01_jupyter.sh"
 run_module "02_workspace.sh"
 run_module "03_custom_nodes.sh"

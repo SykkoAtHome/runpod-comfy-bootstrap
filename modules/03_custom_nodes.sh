@@ -6,10 +6,9 @@ COMFY_DIR="${WORKDIR}/ComfyUI"
 NODES_DIR="${COMFY_DIR}/custom_nodes"
 CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/custom_nodes.txt"
 
-# ComfyUI repository
 if [ ! -d "${COMFY_DIR}/.git" ]; then
-  echo "[nodes] cloning ComfyUI..."
-  git clone https://github.com/comfyanonymous/ComfyUI.git "${COMFY_DIR}"
+  echo "[nodes] ComfyUI not found in ${COMFY_DIR}" >&2
+  exit 1
 fi
 
 # ComfyUI-Manager
