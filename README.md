@@ -19,7 +19,7 @@ The command installs prerequisites, runs four modules, and then starts ComfyUI:
 
 1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888.
 2. **Workspace** – prepares persistent directories and links them with ComfyUI.
-3. **Custom nodes** – clones ComfyUI and listed custom node repositories.
+3. **Custom nodes** – clones listed custom nodes repositories.
 4. **Models** – downloads models defined in `config/models.txt`.
 
 Edit `config/custom_nodes.txt` and `config/models.txt` to customize what gets installed.

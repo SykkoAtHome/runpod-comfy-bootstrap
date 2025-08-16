@@ -2,6 +2,8 @@
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors::diffusion_models
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors::diffusion_models
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors::diffusion_models
+hf://Kijai/WanVideo_comfy::Phantom-Wan-14B_fp16.safetensors::diffusion_models
+hf://Kijai/WanVideo_comfy::Wan2_1-VACE_module_14B_bf16.safetensors::diffusion_models
 
 # WAN2.1 VAE
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/vae/wan_2.1_vae.safetensors::vae
@@ -14,4 +16,4 @@ hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/text_encoders/umt5_xxl_fp
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/clip_vision/clip_vision_h.safetensors::clip_vision
 
 # UPSCALE
-https://huggingface.co/gemasai/4x_NMKD-Siax_200k/resolve/main/4x_NMKD-Siax_200k.pth::upscale_models
+hf://gemasai/4x_NMKD-Siax_200k::4x_NMKD-Siax_200k.pth::upscale_models
