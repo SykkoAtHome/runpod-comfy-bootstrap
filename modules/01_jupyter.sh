@@ -27,7 +27,7 @@ PY
 }
 
 is_jupyter_running() {
-  pgrep -af "jupyter-lab.*--port=${JUPYTER_PORT}" >/dev/null 2>&1
+  pgrep -af "jupyter-lab.*--port[= ]${JUPYTER_PORT}" >/dev/null 2>&1
 }
 
 start_jupyter() {
@@ -50,5 +50,8 @@ start_jupyter() {
 
 ensure_python_tools
 install_jupyter_if_needed
+if command -v pyenv >/dev/null 2>&1; then
+  pyenv rehash
+fi
 start_jupyter
 
