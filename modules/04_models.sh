@@ -38,7 +38,7 @@ fi
 download_file() {
   local url="$1"
   local out="$2"
-  if [ -f "$out" ]; then
+  if [ -f "$out" ] && [ -s "$out" ]; then
     echo "[models] exists: $out"
     return 0
   fi
@@ -47,9 +47,14 @@ download_file() {
     # download using aria2c with 16 connections of 1MB each
     aria2c -x 16 -s 16 -k 1M -o "$(basename "$out")" -d "$(dirname "$out")" \
       --header="${auth_header[*]}" "$url" || \
-      retry curl -L "${auth_header[@]}" -o "$out" "$url"
+      retry curl -fL "${auth_header[@]}" -o "$out" "$url"
   else
-    retry curl -L "${auth_header[@]}" -o "$out" "$url"
+    retry curl -fL "${auth_header[@]}" -o "$out" "$url"
+  fi
+  if [ ! -s "$out" ]; then
+    echo "[models] download failed or empty: $url" >&2
+    rm -f "$out"
+    return 1
   fi
 }
 

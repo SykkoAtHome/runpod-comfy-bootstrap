@@ -27,6 +27,8 @@ wan2.2:
   vae:
     - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/vae/wan2.2_vae.safetensors
       target_dir: vae/wan2.2
+    - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/vae/wan_2.1_vae.safetensors
+      target_dir: vae/wan2.1
   loras:
     - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
       target_dir: loras/wan2.2
