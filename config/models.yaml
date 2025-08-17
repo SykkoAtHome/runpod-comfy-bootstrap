@@ -1,0 +1,53 @@
+wan2.1:
+  diffusion_models:
+    - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.1
+    - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.1
+    - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.1
+    - url: hf://Kijai/WanVideo_comfy/Phantom-Wan-14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.1
+    - url: hf://Kijai/WanVideo_comfy/Wan2_1-VACE_module_14B_bf16.safetensors
+      target_dir: diffusion_models/wan2.1
+  vae:
+    - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/vae/wan_2.1_vae.safetensors
+      target_dir: vae/wan2.1
+
+wan2.2:
+  diffusion_models:
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors
+      target_dir: diffusion_models/wan2.2
+  vae:
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/vae/wan2.2_vae.safetensors
+      target_dir: vae/wan2.2
+  loras:
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
+      target_dir: loras/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors
+      target_dir: loras/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors
+      target_dir: loras/wan2.2
+    - url: hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged/split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors
+      target_dir: loras/wan2.2
+
+text_encoders:
+  - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/text_encoders/umt5_xxl_fp16.safetensors
+    target_dir: text_encoders
+  - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
+    target_dir: text_encoders
+
+clip_vision:
+  - url: hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged/split_files/clip_vision/clip_vision_h.safetensors
+    target_dir: clip_vision
+
+upscale_models:
+  - url: hf://gemasai/4x_NMKD-Siax_200k/4x_NMKD-Siax_200k.pth
+    target_dir: upscale_models
+

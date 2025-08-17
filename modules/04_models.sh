@@ -19,9 +19,16 @@ retry() {
 
 WORKDIR="${WORKDIR:-/workspace}"
 MODELS_DIR="${WORKDIR}/models"
-CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/models.txt"
+CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/models.yaml"
 
 HF_TOKEN="${HF_TOKEN:-}"
+
+get_env() {
+  local name="$1"
+  local val
+  val="$(printenv "$name" 2>/dev/null || true)"
+  echo "${val:-}"
+}
 
 auth_header=()
 if [ -n "$HF_TOKEN" ]; then
@@ -70,31 +77,87 @@ mkdir -p "${MODELS_DIR}/diffusion_models" \
 
 if [ -f "$CFG_FILE" ]; then
   echo "[models] reading list from ${CFG_FILE}"
-  while IFS= read -r line; do
-    [[ -z "$line" || "$line" =~ ^# ]] && continue
-    if [[ "$line" =~ ^hf:// ]]; then
-      spec="${line#hf://}"
-      repo_id="${spec%%::*}"; rest="${spec#*::}"
-      path="${rest%%::*}"; subdir="${rest#*::}"
+  python3 - "$CFG_FILE" <<'PY' | while IFS= read -r dir; do
+import sys, yaml
+
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+
+def iter_items(obj):
+    if isinstance(obj, list):
+        for item in obj or []:
+            yield item
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from iter_items(v)
+
+dirs = set()
+for item in iter_items(data):
+    dirs.add(item.get('target_dir', 'diffusion_models'))
+for d in sorted(dirs):
+    print(d)
+PY
+    mkdir -p "${MODELS_DIR}/${dir}"
+  done
+  while IFS=$'\t' read -r section url subdir; do
+    top_section="${section%%_*}"
+    if [ "$top_section" = "wan2.1" ] || [ "$top_section" = "wan2.2" ]; then
+      var_name="download_${top_section}"
+      var_value="$(get_env "$var_name")"
+      var_value="${var_value:-True}"
+      if [ "$var_value" != "True" ]; then
+        echo "[models] skipping due to ${var_name}=${var_value}: $url"
+        continue
+      fi
+    fi
+
+    if [[ "$url" =~ ^hf:// ]]; then
+      spec="${url#hf://}"
+      repo_id="${spec%%/*}"
+      path="${spec#*/}"
       out="${MODELS_DIR}/${subdir}/$(basename "$path")"
+      mkdir -p "$(dirname "$out")"
       download_hf_resolve "$repo_id" "$path" "$out"
     else
-      fname="$(basename "$line")"
-      out="${MODELS_DIR}/diffusion_models/${fname}"
-      download_file "$line" "$out"
+      fname="$(basename "$url")"
+      out="${MODELS_DIR}/${subdir}/${fname}"
+      mkdir -p "$(dirname "$out")"
+      download_file "$url" "$out"
     fi
-  done < "$CFG_FILE"
+  done < <(python3 - "$CFG_FILE" <<'PY'
+import sys, yaml
+
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+
+def iter_sections(prefix, obj):
+    if isinstance(obj, list):
+        for item in obj or []:
+            yield prefix, item
+    elif isinstance(obj, dict):
+        for key, val in obj.items():
+            new_prefix = f"{prefix}_{key}" if prefix else key
+            yield from iter_sections(new_prefix, val)
+
+for section, item in iter_sections('', data):
+    url = item.get('url')
+    target = item.get('target_dir', 'diffusion_models')
+    print(f"{section}\t{url}\t{target}")
+PY
+  )
 else
   cat <<EOF2
 [models] missing ${CFG_FILE}.
-Add models in one of the formats below (one per line), e.g.:
+Populate it with YAML sections, e.g.:
 
-# direct URL
-https://example.com/path/to/phantom.safetensors
+wan2.1:
+  diffusion_models:
+    - url: hf://owner/repo/path/to/model.safetensors
+      target_dir: diffusion_models/wan2.1
+  vae:
+    - url: hf://owner/repo/path/to/vae.safetensors
+      target_dir: vae/wan2.1
 
-# Hugging Face (resolve)
-hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1.safetensors::diffusion_models
-hf://WAN-Labs/VACE::vace14b.safetensors::diffusion_models
 EOF2
 fi
 
