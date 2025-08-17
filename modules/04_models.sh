@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 retry() {
   local n=0
@@ -42,14 +41,13 @@ download_file() {
     echo "[models] exists: $out"
     return 0
   fi
-  echo "[models] downloading: $url"
+  echo "[models] downloading: $url -> $out"
   if command -v aria2c >/dev/null 2>&1; then
-    # download using aria2c with 16 connections of 1MB each
     aria2c -x 16 -s 16 -k 1M -o "$(basename "$out")" -d "$(dirname "$out")" \
       --header="${auth_header[*]}" "$url" || \
-      retry curl -fL "${auth_header[@]}" -o "$out" "$url"
+      retry curl -fL "${auth_header[@]}" --progress-bar -o "$out" "$url"
   else
-    retry curl -fL "${auth_header[@]}" -o "$out" "$url"
+    retry curl -fL "${auth_header[@]}" --progress-bar -o "$out" "$url"
   fi
   if [ ! -s "$out" ]; then
     echo "[models] download failed or empty: $url" >&2
@@ -106,14 +104,13 @@ PY
   done
   while IFS=$'\t' read -r section url subdir; do
     top_section="${section%%_*}"
-    if [ "$top_section" = "wan2.1" ] || [ "$top_section" = "wan2.2" ]; then
-      var_name="download_${top_section}"
-      var_value="$(get_env "$var_name")"
-      var_value="${var_value:-True}"
-      if [ "$var_value" != "True" ]; then
-        echo "[models] skipping due to ${var_name}=${var_value}: $url"
-        continue
-      fi
+    env_section="$(echo "${top_section}" | tr '.' '_' | tr '[:lower:]' '[:upper:]')"
+    var_name="DOWNLOAD_${env_section}"
+    var_value="$(get_env "$var_name")"
+    var_value="${var_value:-True}"
+    if [ "$var_value" != "True" ]; then
+      echo "[models] skipping due to ${var_name}=${var_value}: $url"
+      continue
     fi
 
     if [[ "$url" =~ ^hf:// ]]; then
@@ -122,12 +119,16 @@ PY
       path="${spec#*/}"
       out="${MODELS_DIR}/${subdir}/$(basename "$path")"
       mkdir -p "$(dirname "$out")"
-      download_hf_resolve "$repo_id" "$path" "$out"
+      if ! download_hf_resolve "$repo_id" "$path" "$out"; then
+        echo "[models] failed to download $url" >&2
+      fi
     else
       fname="$(basename "$url")"
       out="${MODELS_DIR}/${subdir}/${fname}"
       mkdir -p "$(dirname "$out")"
-      download_file "$url" "$out"
+      if ! download_file "$url" "$out"; then
+        echo "[models] failed to download $url" >&2
+      fi
     fi
   done < <(python3 - "$CFG_FILE" <<'PY'
 import sys, yaml
