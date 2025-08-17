@@ -20,9 +20,10 @@ The command installs prerequisites, runs four modules, and then starts ComfyUI:
 1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888 using `python3 -m jupyterlab`; it's monitored with a simple HTTP health check.
 2. **Workspace** – prepares persistent directories and links them with ComfyUI. The `ComfyUI/models` directory is symlinked to `/workspace/models`, avoiding duplication.
 3. **Custom nodes** – clones listed custom nodes repositories. Some plugins automatically install extra dependencies such as `sageattention` and `onnxruntime`.
-4. **Models** – downloads models defined in `config/models.yaml`. Sections can be
-   toggled with environment variables such as `download_wan2_1_diffusion_models`
-   or `download_text_encoders` set to `True`/`False`.
+4. **Models** – downloads models defined in `config/models.yaml`. The `wan2.1`
+   and `wan2.2` sections can be toggled with environment variables
+   `download_wan2.1` and `download_wan2.2` set to `True`/`False`; all other
+   sections are always downloaded.
 
 Edit `config/custom_nodes.txt` and `config/models.yaml` to customize what gets installed.
 
