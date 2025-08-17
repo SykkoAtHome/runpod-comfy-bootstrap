@@ -17,9 +17,9 @@ python main.py --listen 0.0.0.0 --port ${COMFY_PORT:-8188}'
 
 The command installs prerequisites, runs four modules, and then starts ComfyUI:
 
-1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888.
-2. **Workspace** – prepares persistent directories and links them with ComfyUI.
-3. **Custom nodes** – clones listed custom nodes repositories.
+1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888 using `python3 -m jupyterlab`; it's monitored with a simple HTTP health check.
+2. **Workspace** – prepares persistent directories and links them with ComfyUI. The `ComfyUI/models` directory is symlinked to `/workspace/models`, avoiding duplication.
+3. **Custom nodes** – clones listed custom nodes repositories. Some plugins automatically install extra dependencies such as `sageattention` and `onnxruntime`.
 4. **Models** – downloads models defined in `config/models.txt`.
 
 Edit `config/custom_nodes.txt` and `config/models.txt` to customize what gets installed.
