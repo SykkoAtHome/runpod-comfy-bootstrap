@@ -38,5 +38,5 @@ wan2.1:
     target_dir: diffusion_models
 ```
 
-Parsing the YAML requires [PyYAML](https://pyyaml.org); install it with
-`pip install pyyaml` if it's not already available.
+Parsing the YAML requires [PyYAML](https://pyyaml.org); the bootstrap script
+installs it automatically.

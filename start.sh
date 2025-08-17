@@ -52,6 +52,7 @@ if ! retry apt-get update; then
 fi
 retry apt-get install -y git aria2 unzip curl rsync procps
 retry python3 -m pip install --upgrade huggingface_hub
+retry python3 -m pip install --upgrade pyyaml
 
 # Ensure ComfyUI repository exists
 COMFY_DIR="${WORKDIR}/ComfyUI"
