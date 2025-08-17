@@ -79,19 +79,28 @@ if [ -f "$CFG_FILE" ]; then
   echo "[models] reading list from ${CFG_FILE}"
   python3 - "$CFG_FILE" <<'PY' | while IFS= read -r dir; do
 import sys, yaml
+
 with open(sys.argv[1]) as f:
     data = yaml.safe_load(f) or {}
+
+def iter_items(obj):
+    if isinstance(obj, list):
+        for item in obj or []:
+            yield item
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            yield from iter_items(v)
+
 dirs = set()
-for items in data.values():
-    for item in items or []:
-        dirs.add(item.get('target_dir', 'diffusion_models'))
+for item in iter_items(data):
+    dirs.add(item.get('target_dir', 'diffusion_models'))
 for d in sorted(dirs):
     print(d)
 PY
     mkdir -p "${MODELS_DIR}/${dir}"
   done
   while IFS=$'\t' read -r section url subdir; do
-    var_name="$(echo "download_${section}" | tr '[:upper:]' '[:lower:]')"
+    var_name="$(echo "download_${section}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_' '_')"
     var_value="$(get_env "$var_name")"
     var_value="${var_value:-True}"
     if [ "$var_value" != "True" ]; then
@@ -114,13 +123,23 @@ PY
     fi
   done < <(python3 - "$CFG_FILE" <<'PY'
 import sys, yaml
+
 with open(sys.argv[1]) as f:
     data = yaml.safe_load(f) or {}
-for section, items in data.items():
-    for item in items or []:
-        url = item.get('url')
-        target = item.get('target_dir', 'diffusion_models')
-        print(f"{section}\t{url}\t{target}")
+
+def iter_sections(prefix, obj):
+    if isinstance(obj, list):
+        for item in obj or []:
+            yield prefix, item
+    elif isinstance(obj, dict):
+        for key, val in obj.items():
+            new_prefix = f"{prefix}_{key}" if prefix else key
+            yield from iter_sections(new_prefix, val)
+
+for section, item in iter_sections('', data):
+    url = item.get('url')
+    target = item.get('target_dir', 'diffusion_models')
+    print(f"{section}\t{url}\t{target}")
 PY
   )
 else
@@ -129,8 +148,12 @@ else
 Populate it with YAML sections, e.g.:
 
 wan2.1:
-  - url: hf://owner/repo/path/to/model.safetensors
-    target_dir: diffusion_models
+  diffusion_models:
+    - url: hf://owner/repo/path/to/model.safetensors
+      target_dir: diffusion_models/wan2.1
+  vae:
+    - url: hf://owner/repo/path/to/vae.safetensors
+      target_dir: vae/wan2.1
 
 EOF2
 fi
