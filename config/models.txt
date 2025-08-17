@@ -1,19 +1,40 @@
 # WAN2.1
-#hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors::diffusion_models
-hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors::diffusion_models
-#hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors::diffusion_models
-#hf://Kijai/WanVideo_comfy::Phantom-Wan-14B_fp16.safetensors::diffusion_models
-#hf://Kijai/WanVideo_comfy::Wan2_1-VACE_module_14B_bf16.safetensors::diffusion_models
 
-# WAN2.1 VAE
+## DIFFUSION
+hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_i2v_720p_14B_fp16.safetensors::diffusion_models
+hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_t2v_14B_fp16.safetensors::diffusion_models
+hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/diffusion_models/wan2.1_vace_14B_fp16.safetensors::diffusion_models
+hf://Kijai/WanVideo_comfy::Phantom-Wan-14B_fp16.safetensors::diffusion_models
+hf://Kijai/WanVideo_comfy::Wan2_1-VACE_module_14B_bf16.safetensors::diffusion_models
+
+## VAE
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/vae/wan_2.1_vae.safetensors::vae
 
-# Text Encoders
+## TEXT ENCODERS
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/text_encoders/umt5_xxl_fp16.safetensors::text_encoders
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors::text_encoders
 
-# CLIP
+## CLIP
 hf://Comfy-Org/Wan_2.1_ComfyUI_repackaged::split_files/clip_vision/clip_vision_h.safetensors::clip_vision
 
-# UPSCALE
+
+# WAN2.2
+
+## DIFFUSION
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors::diffusion_models
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors::diffusion_models
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors::diffusion_models
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors::diffusion_models
+
+## VAE
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/vae/wan2.2_vae.safetensors::vae
+
+## LORAS
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors::loras
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors::loras
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors::loras
+hf://Comfy-Org/Wan_2.2_ComfyUI_Repackaged::split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors::loras
+
+
+# UPSCALE (niezależne)
 hf://gemasai/4x_NMKD-Siax_200k::4x_NMKD-Siax_200k.pth::upscale_models
