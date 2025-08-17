@@ -10,3 +10,4 @@ https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git
 https://github.com/yolain/ComfyUI-Easy-Use.git
 https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git
 https://github.com/Fannovel16/comfyui_controlnet_aux.git
+https://github.com/pollockjj/ComfyUI-MultiGPU.git
