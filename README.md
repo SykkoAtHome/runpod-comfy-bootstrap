@@ -12,7 +12,7 @@ bash -lc 'cd /workspace && rm -rf runpod-comfy-bootstrap && \
 git clone https://github.com/SykkoAtHome/runpod-comfy-bootstrap.git && \
 bash runpod-comfy-bootstrap/start.sh && \
 cd /workspace/ComfyUI && \
-python main.py --listen 0.0.0.0 --port 8188'
+python main.py --listen 0.0.0.0 --port ${COMFY_PORT:-8188}'
 ```
 
 The command installs prerequisites, runs four modules, and then starts ComfyUI:
