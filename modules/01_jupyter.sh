@@ -27,7 +27,8 @@ PY
 }
 
 is_jupyter_running() {
-  pgrep -af "jupyter-lab.*--port[= ]${JUPYTER_PORT}" >/dev/null 2>&1
+  # match both "jupyter lab" and "jupyter-lab" along with the configured port
+  pgrep -af "jupyter( |-)?lab.*--port[= ]${JUPYTER_PORT}" >/dev/null 2>&1
 }
 
 start_jupyter() {
@@ -37,14 +38,22 @@ start_jupyter() {
   fi
 
   echo "[Jupyter] starting on port ${JUPYTER_PORT}..."
-  nohup jupyter lab \
+  nohup python3 -m jupyterlab \
     --ip=0.0.0.0 \
     --port="${JUPYTER_PORT}" \
     --ServerApp.token="${JUPYTER_TOKEN}" \
+    --ServerApp.allow_origin="*" \
     --no-browser \
     --allow-root \
     >"${LOGDIR}/jupyter.log" 2>&1 &
-  sleep 1
+  # short wait and HTTP healthcheck
+  for _ in $(seq 1 20); do
+    sleep 1
+    if curl -s "http://127.0.0.1:${JUPYTER_PORT}/api" >/dev/null 2>&1; then
+      echo "[Jupyter] healthy on port ${JUPYTER_PORT}"
+      break
+    fi
+  done
   echo "[Jupyter] logs: ${LOGDIR}/jupyter.log"
 }
 
