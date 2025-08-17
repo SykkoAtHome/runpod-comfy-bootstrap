@@ -77,6 +77,19 @@ mkdir -p "${MODELS_DIR}/diffusion_models" \
 
 if [ -f "$CFG_FILE" ]; then
   echo "[models] reading list from ${CFG_FILE}"
+  python3 - "$CFG_FILE" <<'PY' | while IFS= read -r dir; do
+import sys, yaml
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+dirs = set()
+for items in data.values():
+    for item in items or []:
+        dirs.add(item.get('target_dir', 'diffusion_models'))
+for d in sorted(dirs):
+    print(d)
+PY
+    mkdir -p "${MODELS_DIR}/${dir}"
+  done
   while IFS=$'\t' read -r section url subdir; do
     var_name="$(echo "download_${section}" | tr '[:upper:]' '[:lower:]')"
     var_value="$(get_env "$var_name")"
