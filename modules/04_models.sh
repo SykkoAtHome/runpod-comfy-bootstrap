@@ -34,6 +34,38 @@ if [ -n "$HF_TOKEN" ]; then
   auth_header=(-H "Authorization: Bearer ${HF_TOKEN}")
 fi
 
+entries=()
+if [ -f "$CFG_FILE" ]; then
+  mapfile -t entries < <(python3 - "$CFG_FILE" <<'PY'
+import sys, yaml
+
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+
+def iter_sections(prefix, obj):
+    if isinstance(obj, list):
+        for item in obj or []:
+            yield prefix, item
+    elif isinstance(obj, dict):
+        for key, val in obj.items():
+            new_prefix = f"{prefix}_{key}" if prefix else key
+            yield from iter_sections(new_prefix, val)
+
+for section, item in iter_sections('', data):
+    url = item.get('url')
+    target = item.get('target_dir', 'diffusion_models')
+    print(f"{section}\t{url}\t{target}")
+PY
+  )
+fi
+TOTAL_STEPS=${#entries[@]}
+STEP=0
+
+log_step() {
+  local msg="$1"
+  echo "[models] [$STEP/$TOTAL_STEPS] $msg"
+}
+
 download_file() {
   local url="$1"
   local out="$2"
@@ -41,7 +73,6 @@ download_file() {
     echo "[models] exists: $out"
     return 0
   fi
-  echo "[models] downloading: $url -> $out"
   if command -v aria2c >/dev/null 2>&1; then
     aria2c -x 16 -s 16 -k 1M -o "$(basename "$out")" -d "$(dirname "$out")" \
       --header="${auth_header[*]}" "$url" || \
@@ -102,14 +133,16 @@ for d in sorted(dirs):
 PY
     mkdir -p "${MODELS_DIR}/${dir}"
   done
-  while IFS=$'\t' read -r section url subdir; do
+  for line in "${entries[@]}"; do
+    STEP=$((STEP+1))
+    IFS=$'\t' read -r section url subdir <<< "$line"
     top_section="${section%%_*}"
     env_section="$(echo "${top_section}" | tr '.' '_' | tr '[:lower:]' '[:upper:]')"
     var_name="DOWNLOAD_${env_section}"
     var_value="$(get_env "$var_name")"
     var_value="${var_value:-True}"
     if [ "$var_value" != "True" ]; then
-      echo "[models] skipping due to ${var_name}=${var_value}: $url"
+      log_step "skipping due to ${var_name}=${var_value}: $url"
       continue
     fi
 
@@ -119,6 +152,7 @@ PY
       path="${spec#*/}"
       out="${MODELS_DIR}/${subdir}/$(basename "$path")"
       mkdir -p "$(dirname "$out")"
+      log_step "downloading ${url} -> ${out}"
       if ! download_hf_resolve "$repo_id" "$path" "$out"; then
         echo "[models] failed to download $url" >&2
       fi
@@ -126,31 +160,12 @@ PY
       fname="$(basename "$url")"
       out="${MODELS_DIR}/${subdir}/${fname}"
       mkdir -p "$(dirname "$out")"
+      log_step "downloading ${url} -> ${out}"
       if ! download_file "$url" "$out"; then
         echo "[models] failed to download $url" >&2
       fi
     fi
-  done < <(python3 - "$CFG_FILE" <<'PY'
-import sys, yaml
-
-with open(sys.argv[1]) as f:
-    data = yaml.safe_load(f) or {}
-
-def iter_sections(prefix, obj):
-    if isinstance(obj, list):
-        for item in obj or []:
-            yield prefix, item
-    elif isinstance(obj, dict):
-        for key, val in obj.items():
-            new_prefix = f"{prefix}_{key}" if prefix else key
-            yield from iter_sections(new_prefix, val)
-
-for section, item in iter_sections('', data):
-    url = item.get('url')
-    target = item.get('target_dir', 'diffusion_models')
-    print(f"{section}\t{url}\t{target}")
-PY
-  )
+  done
 else
   cat <<EOF2
 [models] missing ${CFG_FILE}.
