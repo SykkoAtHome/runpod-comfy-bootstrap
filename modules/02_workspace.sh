@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 WORKDIR="${WORKDIR:-/workspace}"
 
@@ -15,14 +14,23 @@ echo "[workspace] COMFY_DIR = ${COMFY_DIR}"
 # ensure common directories
 mkdir -p "${WORKDIR}/input" "${WORKDIR}/output" "${WORKDIR}/workflows" "${WORKDIR}/logs" "${WORKDIR}/models"
 
+safe_link() {
+  local target="$1"
+  local link="$2"
+  if [ -e "$link" ] && [ ! -L "$link" ]; then
+    echo "[workspace] exists and not a symlink, leaving: $link"
+  else
+    ln -sfn "$target" "$link"
+    echo "[workspace] link: $link -> $target"
+  fi
+}
+
 # link ComfyUI models directory directly to workspace/models to avoid duplicates
-rm -rf "${COMFY_DIR}/models"
-ln -sfn "${WORKDIR}/models" "${COMFY_DIR}/models"
+safe_link "${WORKDIR}/models" "${COMFY_DIR}/models"
 
 # link input/output to ComfyUI for convenience
-ln -sfn "${WORKDIR}/input"  "${COMFY_DIR}/input"
-ln -sfn "${WORKDIR}/output" "${COMFY_DIR}/output"
+safe_link "${WORKDIR}/input"  "${COMFY_DIR}/input"
+safe_link "${WORKDIR}/output" "${COMFY_DIR}/output"
 
-echo "[workspace] models linked to /workspace/models (no extra_model_paths.yaml)"
 echo "[workspace] done."
 
