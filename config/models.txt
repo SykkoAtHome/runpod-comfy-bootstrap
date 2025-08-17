@@ -1,3 +1,6 @@
+# Model download list grouped by section.
+# Set environment variables `download_<section>` to "True" or "False"
+# to control downloads (e.g. `download_wan2.1=True`).
 # WAN2.1
 
 ## DIFFUSION

@@ -23,6 +23,13 @@ CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/models.txt"
 
 HF_TOKEN="${HF_TOKEN:-}"
 
+get_env() {
+  local name="$1"
+  local val
+  val="$(printenv "$name" 2>/dev/null || true)"
+  echo "${val:-}"
+}
+
 auth_header=()
 if [ -n "$HF_TOKEN" ]; then
   auth_header=(-H "Authorization: Bearer ${HF_TOKEN}")
@@ -70,8 +77,22 @@ mkdir -p "${MODELS_DIR}/diffusion_models" \
 
 if [ -f "$CFG_FILE" ]; then
   echo "[models] reading list from ${CFG_FILE}"
+  section=""
   while IFS= read -r line; do
+    if [[ "$line" =~ ^#[^#] ]]; then
+      section="$(echo "$line" | sed -E 's/^#[[:space:]]*([^[:space:]]+).*/\1/')"
+      continue
+    fi
     [[ -z "$line" || "$line" =~ ^# ]] && continue
+
+    var_name="$(echo "download_${section}" | tr '[:upper:]' '[:lower:]')"
+    var_value="$(get_env "$var_name")"
+    var_value="${var_value:-True}"
+    if [ "$var_value" != "True" ]; then
+      echo "[models] skipping due to ${var_name}=${var_value}: $line"
+      continue
+    fi
+
     if [[ "$line" =~ ^hf:// ]]; then
       spec="${line#hf://}"
       repo_id="${spec%%::*}"; rest="${spec#*::}"
