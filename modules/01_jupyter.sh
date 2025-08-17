@@ -6,6 +6,14 @@ WORKDIR="${WORKDIR:-/workspace}"
 LOGDIR="${LOGDIR:-${WORKDIR}/logs}"
 mkdir -p "$LOGDIR"
 
+TOTAL_STEPS=2
+STEP=1
+
+log_step() {
+  local msg="$1"
+  echo "[Jupyter] [$STEP/$TOTAL_STEPS] $msg"
+}
+
 install_jupyter_if_needed() {
   python3 - <<'PY'
 import importlib, sys, subprocess
@@ -57,9 +65,12 @@ start_jupyter() {
   echo "[Jupyter] logs: ${LOGDIR}/jupyter.log"
 }
 
+log_step "ensuring jupyterlab is installed"
 install_jupyter_if_needed
 if command -v pyenv >/dev/null 2>&1; then
   pyenv rehash
 fi
+STEP=$((STEP+1))
+log_step "starting jupyterlab"
 start_jupyter
 

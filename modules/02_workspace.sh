@@ -2,16 +2,26 @@
 
 WORKDIR="${WORKDIR:-/workspace}"
 
+TOTAL_STEPS=3
+STEP=1
+
+log_step() {
+  local msg="$1"
+  echo "[workspace] [$STEP/$TOTAL_STEPS] $msg"
+}
+
 # locate or create ComfyUI directory
+log_step "locating ComfyUI directory"
 CANDIDATES=("${WORKDIR}/ComfyUI" "/workspace/ComfyUI" "/opt/ComfyUI")
 COMFY_DIR=""
 for c in "${CANDIDATES[@]}"; do
   if [ -d "$c" ]; then COMFY_DIR="$c"; break; fi
 done
 [ -z "$COMFY_DIR" ] && COMFY_DIR="${WORKDIR}/ComfyUI" && mkdir -p "${COMFY_DIR}"
-
 echo "[workspace] COMFY_DIR = ${COMFY_DIR}"
-# ensure common directories
+
+STEP=$((STEP+1))
+log_step "ensuring common directories"
 mkdir -p "${WORKDIR}/input" "${WORKDIR}/output" "${WORKDIR}/workflows" "${WORKDIR}/logs" "${WORKDIR}/models"
 
 safe_link() {
@@ -25,6 +35,9 @@ safe_link() {
   fi
 }
 
+# link directories
+STEP=$((STEP+1))
+log_step "creating symlinks"
 # link ComfyUI models directory directly to workspace/models to avoid duplicates
 safe_link "${WORKDIR}/models" "${COMFY_DIR}/models"
 
