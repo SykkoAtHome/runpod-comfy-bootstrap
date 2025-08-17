@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+retry() {
+  local n=0
+  local max=5
+  local delay=2
+  while true; do
+    "$@" && break
+    n=$((n+1))
+    if [ "$n" -ge "$max" ]; then
+      return 1
+    fi
+    echo "[retry] retry $n/$max: $*"
+    sleep "$delay"
+    delay=$((delay*2))
+  done
+}
+
 WORKDIR="${WORKDIR:-/workspace}"
 COMFY_DIR="${WORKDIR}/ComfyUI"
 NODES_DIR="${COMFY_DIR}/custom_nodes"
@@ -14,9 +30,9 @@ fi
 # ComfyUI-Manager
 if [ ! -d "${NODES_DIR}/ComfyUI-Manager/.git" ]; then
   echo "[nodes] installing ComfyUI-Manager..."
-  git clone https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager"
+  retry git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager"
 else
-  (cd "${NODES_DIR}/ComfyUI-Manager" && git pull --rebase || true)
+  retry git -C "${NODES_DIR}/ComfyUI-Manager" pull --rebase || true
 fi
 
 # additional nodes from config
@@ -28,10 +44,10 @@ if [ -f "$CFG_FILE" ]; then
     dest="${NODES_DIR}/${name}"
     if [ ! -d "${dest}/.git" ]; then
       echo "[nodes] clone: $repo"
-      git clone "$repo" "$dest" || true
+      retry git clone --depth 1 "$repo" "$dest" || true
     else
       echo "[nodes] update: $name"
-      (cd "$dest" && git pull --rebase || true)
+      retry git -C "$dest" pull --rebase || true
     fi
   done < "$CFG_FILE"
 else
@@ -40,8 +56,12 @@ fi
 
 # requirements
 echo "[nodes] installing Python dependencies..."
-python3 -m pip install --upgrade pip wheel setuptools
-python3 -m pip install -r "${COMFY_DIR}/requirements.txt" || true
+reqs=()
+[ -f "${COMFY_DIR}/requirements.txt" ] && reqs+=("-r" "${COMFY_DIR}/requirements.txt")
 for req in "${NODES_DIR}"/*/requirements.txt; do
-  [ -f "$req" ] && python3 -m pip install -r "$req" || true
+  [ -f "$req" ] && reqs+=("-r" "$req")
 done
+if [ "${#reqs[@]}" -gt 0 ]; then
+  python3 -m pip install --upgrade pip wheel setuptools
+  python3 -m pip install "${reqs[@]}" || true
+fi
