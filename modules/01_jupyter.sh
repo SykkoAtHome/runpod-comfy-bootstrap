@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 JUPYTER_PORT="${JUPYTER_PORT:-8888}"
 JUPYTER_TOKEN="${JUPYTER_TOKEN:-changeme}"
 WORKDIR="${WORKDIR:-/workspace}"
 LOGDIR="${LOGDIR:-${WORKDIR}/logs}"
 mkdir -p "$LOGDIR"
-
-ensure_python_tools() {
-  python3 - <<'PY'
-import sys, subprocess
-subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"])
-PY
-}
 
 install_jupyter_if_needed() {
   python3 - <<'PY'
@@ -31,9 +23,17 @@ is_jupyter_running() {
   pgrep -af "jupyter( |-)?lab.*--port[= ]${JUPYTER_PORT}" >/dev/null 2>&1
 }
 
+is_port_in_use() {
+  ss -ltn "sport = :${JUPYTER_PORT}" | grep -q LISTEN
+}
+
 start_jupyter() {
   if is_jupyter_running; then
     echo "[Jupyter] already running on port ${JUPYTER_PORT}."
+    return
+  fi
+  if is_port_in_use; then
+    echo "[Jupyter] port ${JUPYTER_PORT} is in use by another process; skipping"
     return
   fi
 
@@ -57,7 +57,6 @@ start_jupyter() {
   echo "[Jupyter] logs: ${LOGDIR}/jupyter.log"
 }
 
-ensure_python_tools
 install_jupyter_if_needed
 if command -v pyenv >/dev/null 2>&1; then
   pyenv rehash

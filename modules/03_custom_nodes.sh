@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 retry() {
   local n=0
@@ -23,14 +22,14 @@ NODES_DIR="${COMFY_DIR}/custom_nodes"
 CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/custom_nodes.txt"
 
 if [ ! -d "${COMFY_DIR}/.git" ]; then
-  echo "[nodes] ComfyUI not found in ${COMFY_DIR}" >&2
-  exit 1
+  echo "[nodes] ComfyUI not found in ${COMFY_DIR}, skipping custom nodes"
+  exit 0
 fi
 
 # ComfyUI-Manager
 if [ ! -d "${NODES_DIR}/ComfyUI-Manager/.git" ]; then
   echo "[nodes] installing ComfyUI-Manager..."
-  retry git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager"
+  retry git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager" || true
 else
   retry git -C "${NODES_DIR}/ComfyUI-Manager" pull --rebase || true
 fi
@@ -62,7 +61,6 @@ for req in "${NODES_DIR}"/*/requirements.txt; do
   [ -f "$req" ] && reqs+=("-r" "$req")
 done
 if [ "${#reqs[@]}" -gt 0 ]; then
-  python3 -m pip install --upgrade pip wheel setuptools
   python3 -m pip install "${reqs[@]}" || true
 fi
 

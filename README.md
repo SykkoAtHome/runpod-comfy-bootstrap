@@ -4,28 +4,41 @@ Bootstraps a RunPod workspace with ComfyUI, custom nodes, and models.
 
 ## Usage
 
-Put the following in the RunPod **Start Command** to clone this repository,
-run the bootstrap script, and launch ComfyUI:
+The repository is expected to live inside the RunPod workspace. On pod start
+simply execute:
 
 ```bash
-bash -lc 'cd /workspace && rm -rf runpod-comfy-bootstrap && \
-git clone https://github.com/SykkoAtHome/runpod-comfy-bootstrap.git && \
-bash runpod-comfy-bootstrap/start.sh && \
-cd /workspace/ComfyUI && \
-python main.py --listen 0.0.0.0 --port ${COMFY_PORT:-8188}'
+bash /workspace/runpod-comfy-bootstrap/start.sh
 ```
 
-The command installs prerequisites, runs four modules, and then starts ComfyUI:
+The script installs missing prerequisites on the first run and writes a marker
+file `/workspace/.bootstrap_done`. Later runs detect the marker and skip the
+installation step. To update the bootstrap itself, run `git pull` inside the
+repository instead of re-cloning it each start.
 
-1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888 using `python3 -m jupyterlab`; it's monitored with a simple HTTP health check.
-2. **Workspace** – prepares persistent directories and links them with ComfyUI. The `ComfyUI/models` directory is symlinked to `/workspace/models`, avoiding duplication.
-3. **Custom nodes** – clones listed custom nodes repositories. Some plugins automatically install extra dependencies such as `sageattention` and `onnxruntime`.
-4. **Models** – downloads models defined in `config/models.yaml`. The `wan2.1`
-   and `wan2.2` sections can be toggled with environment variables
-   `download_wan2.1` and `download_wan2.2` set to `True`/`False`; all other
-   sections are always downloaded.
+Four modules are executed in order, each idempotent:
 
-Edit `config/custom_nodes.txt` and `config/models.yaml` to customize what gets installed.
+1. **Jupyter** – ensures JupyterLab is available and starts it on port 8888
+   (can be skipped by listing `01_jupyter.sh` in `SKIP_MODULES`).
+2. **Workspace** – prepares persistent directories and creates safe symlinks to
+   the ComfyUI workspace.
+3. **Custom nodes** – clones repositories listed in `config/custom_nodes.txt`.
+   Failures to clone a node are logged but do not abort the bootstrap.
+4. **Models** – downloads models defined in `config/models.yaml`. Sections
+   `wan2.1` and `wan2.2` can be toggled with environment variables
+   `DOWNLOAD_WAN2_1` and `DOWNLOAD_WAN2_2` set to `True`/`False`.
+
+Common environment flags:
+
+| Variable | Description |
+| --- | --- |
+| `SKIP_INSTALL=1` | Skip prerequisite installation even if `.bootstrap_done` is missing. |
+| `SKIP_MODULES="01_jupyter.sh 03_custom_nodes.sh"` | Space separated list of module scripts to skip. Use `all` to skip every module. |
+| `DOWNLOAD_WAN2_1=False` | Do not download models in the `wan2.1` section (similar for `DOWNLOAD_WAN2_2`). |
+
+Module logs are written to `/workspace/logs`.
+
+Edit `config/custom_nodes.txt` and `config/models.yaml` to control what gets installed.
 
 ### Model configuration
 
