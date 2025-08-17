@@ -100,12 +100,15 @@ PY
     mkdir -p "${MODELS_DIR}/${dir}"
   done
   while IFS=$'\t' read -r section url subdir; do
-    var_name="$(echo "download_${section}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9_' '_')"
-    var_value="$(get_env "$var_name")"
-    var_value="${var_value:-True}"
-    if [ "$var_value" != "True" ]; then
-      echo "[models] skipping due to ${var_name}=${var_value}: $url"
-      continue
+    top_section="${section%%_*}"
+    if [ "$top_section" = "wan2.1" ] || [ "$top_section" = "wan2.2" ]; then
+      var_name="download_${top_section}"
+      var_value="$(get_env "$var_name")"
+      var_value="${var_value:-True}"
+      if [ "$var_value" != "True" ]; then
+        echo "[models] skipping due to ${var_name}=${var_value}: $url"
+        continue
+      fi
     fi
 
     if [[ "$url" =~ ^hf:// ]]; then
