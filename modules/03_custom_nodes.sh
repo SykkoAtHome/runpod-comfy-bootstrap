@@ -65,3 +65,11 @@ if [ "${#reqs[@]}" -gt 0 ]; then
   python3 -m pip install --upgrade pip wheel setuptools
   python3 -m pip install "${reqs[@]}" || true
 fi
+
+# optional dependencies for certain plugins
+if [ -d "${NODES_DIR}/ComfyUI-Impact-Pack" ]; then
+  python3 -m pip install sageattention || true
+fi
+if [ -d "${NODES_DIR}/ComfyUI-Easy-Use" ]; then
+  python3 -m pip install onnxruntime-gpu || python3 -m pip install onnxruntime || true
+fi

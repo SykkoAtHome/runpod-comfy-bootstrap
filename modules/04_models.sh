@@ -36,7 +36,14 @@ download_file() {
     return 0
   fi
   echo "[models] downloading: $url"
-  retry curl -L "${auth_header[@]}" -o "$out" "$url"
+  if command -v aria2c >/dev/null 2>&1; then
+    # download using aria2c with 16 connections of 1MB each
+    aria2c -x 16 -s 16 -k 1M -o "$(basename "$out")" -d "$(dirname "$out")" \
+      --header="${auth_header[*]}" "$url" || \
+      retry curl -L "${auth_header[@]}" -o "$out" "$url"
+  else
+    retry curl -L "${auth_header[@]}" -o "$out" "$url"
+  fi
 }
 
 download_hf_resolve() {
