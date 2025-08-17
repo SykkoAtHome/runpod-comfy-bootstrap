@@ -21,40 +21,52 @@ COMFY_DIR="${WORKDIR}/ComfyUI"
 NODES_DIR="${COMFY_DIR}/custom_nodes"
 CFG_FILE="${WORKDIR}/runpod-comfy-bootstrap/config/custom_nodes.txt"
 
+repos=()
+if [ -f "$CFG_FILE" ]; then
+  mapfile -t repos < <(grep -vE '^\s*$|^\s*#' "$CFG_FILE")
+fi
+TOTAL_STEPS=$(( ${#repos[@]} + 2 ))
+STEP=1
+
+log_step() {
+  local msg="$1"
+  echo "[nodes] [$STEP/$TOTAL_STEPS] $msg"
+}
+
 if [ ! -d "${COMFY_DIR}/.git" ]; then
   echo "[nodes] ComfyUI not found in ${COMFY_DIR}, skipping custom nodes"
   exit 0
 fi
 
 # ComfyUI-Manager
+log_step "installing ComfyUI-Manager"
 if [ ! -d "${NODES_DIR}/ComfyUI-Manager/.git" ]; then
-  echo "[nodes] installing ComfyUI-Manager..."
-  retry git clone --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager" || true
+  retry git clone --progress --depth 1 https://github.com/ltdrdata/ComfyUI-Manager.git "${NODES_DIR}/ComfyUI-Manager" || true
 else
-  retry git -C "${NODES_DIR}/ComfyUI-Manager" pull --rebase || true
+  retry git -C "${NODES_DIR}/ComfyUI-Manager" pull --progress --rebase || true
 fi
+STEP=$((STEP+1))
 
 # additional nodes from config
-if [ -f "$CFG_FILE" ]; then
+if [ ${#repos[@]} -gt 0 ]; then
   echo "[nodes] reading list from ${CFG_FILE}"
-  while IFS= read -r repo; do
-    [[ -z "$repo" || "$repo" =~ ^# ]] && continue
+  for repo in "${repos[@]}"; do
+    log_step "processing ${repo}"
     name="$(basename "$repo" .git)"
     dest="${NODES_DIR}/${name}"
     if [ ! -d "${dest}/.git" ]; then
-      echo "[nodes] clone: $repo"
-      retry git clone --depth 1 "$repo" "$dest" || true
+      retry git clone --progress --depth 1 "$repo" "$dest" || true
     else
-      echo "[nodes] update: $name"
-      retry git -C "$dest" pull --rebase || true
+      retry git -C "$dest" pull --progress --rebase || true
     fi
-  done < "$CFG_FILE"
+    STEP=$((STEP+1))
+  done
 else
   echo "[nodes] missing ${CFG_FILE}. Add Git repositories (one per line)."
 fi
 
 # requirements
-echo "[nodes] installing Python dependencies..."
+log_step "installing Python dependencies"
 reqs=()
 [ -f "${COMFY_DIR}/requirements.txt" ] && reqs+=("-r" "${COMFY_DIR}/requirements.txt")
 for req in "${NODES_DIR}"/*/requirements.txt; do
