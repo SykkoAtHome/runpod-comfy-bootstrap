@@ -30,12 +30,13 @@ Edit `config/custom_nodes.txt` and `config/models.yaml` to customize what gets i
 
 Models are listed in `config/models.yaml`, grouped by section. Each entry
 contains a `url` and a `target_dir` describing where the file should be stored.
-Example:
+The `target_dir` may include nested directories, which will be created
+automatically. Example:
 
 ```yaml
 wan2.1:
   - url: hf://owner/repo/path/to/model.safetensors
-    target_dir: diffusion_models
+    target_dir: diffusion_models/wan2.1
 ```
 
 Parsing the YAML requires [PyYAML](https://pyyaml.org); the bootstrap script
