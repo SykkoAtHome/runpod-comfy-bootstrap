@@ -70,3 +70,8 @@ run_module "04_models.sh"
 
 echo "[bootstrap] all modules started ✅"
 
+# Start ComfyUI in the foreground to keep the container alive
+echo "[bootstrap] launching ComfyUI..."
+cd "$COMFY_DIR"
+exec python main.py --listen 0.0.0.0 --port "${COMFY_PORT:-8188}"
+
