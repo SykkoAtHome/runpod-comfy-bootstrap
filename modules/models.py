@@ -4,7 +4,8 @@ import shutil
 from pathlib import Path
 
 import requests
-from huggingface_hub import hf_hub_download
+from huggingface_hub import hf_hub_download, hf_hub_url
+from tqdm import tqdm
 
 from .utils import env_true
 
@@ -15,11 +16,29 @@ HF_CACHE_DIR = Path(os.getenv("HF_HOME", "/workspace/.cache/huggingface"))
 HF_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _has_space(required: int) -> bool:
+    free = shutil.disk_usage("/workspace").free
+    return required == 0 or free >= required * 2
+
+
 def _download_hf(url: str, dest: Path, token: str | None) -> None:
     repo_path = url[len("hf://") :]
     parts = repo_path.split("/", 2)
     repo_id = "/".join(parts[:2])
     file_path = parts[2]
+
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    try:
+        head = requests.head(hf_hub_url(repo_id=repo_id, filename=file_path), headers=headers, allow_redirects=True)
+        head.raise_for_status()
+        total = int(head.headers.get("Content-Length", 0))
+        if total and not _has_space(total):
+            print(f"Skipping download of {file_path} due to insufficient disk space", flush=True)
+            return
+    except Exception:
+        total = 0
+
+    print(f"Downloading {file_path}...", flush=True)
     downloaded = hf_hub_download(repo_id=repo_id, filename=file_path, token=token, cache_dir=HF_CACHE_DIR)
     shutil.copy(downloaded, dest)
 
@@ -30,18 +49,27 @@ def _download_http(url: str, dest: Path, token: str | None) -> None:
         headers["Authorization"] = f"Bearer {token}"
     with requests.get(url, headers=headers, stream=True) as r:
         r.raise_for_status()
-        with open(dest, "wb") as f:
+        total = int(r.headers.get("Content-Length", 0))
+        if total and not _has_space(total):
+            print(f"Skipping download of {dest.name} due to insufficient disk space", flush=True)
+            return
+        with open(dest, "wb") as f, tqdm(total=total, unit="B", unit_scale=True, desc=dest.name) as pbar:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
+                    pbar.update(len(chunk))
 
 
 def _download_file(item: dict) -> None:
     url = item["url"]
     target_dir = COMFY_MODELS_DIR / item["target_dir"]
-    target_dir.mkdir(parents=True, exist_ok=True)
     dest = target_dir / item["rename_to"]
     if dest.exists():
+        return
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        print(f"Skipping download of {url}: cannot create directory {target_dir} (filesystem error: {e})", flush=True)
         return
     try:
         if url.startswith("hf://"):
@@ -50,7 +78,7 @@ def _download_file(item: dict) -> None:
             token = os.getenv("CIVITAI_KEY") if "civitai" in url.lower() else None
             _download_http(url, dest, token)
     except OSError as e:
-        print(f"Skipping download of {url} due to error: {e}", flush=True)
+        print(f"Skipping download of {url} due to filesystem error (likely out of space): {e}", flush=True)
 
 
 def _process_group(group: dict) -> None:
@@ -66,14 +94,17 @@ def download_models() -> None:
         cfg = json.load(f)
 
     if env_true("download_wan2_1"):
+        print("Downloading wan2.1...", flush=True)
         _process_group(cfg.get("wan2.1", {}))
 
     if env_true("download_wan2_2"):
+        print("Downloading wan2.2...", flush=True)
         _process_group(cfg.get("wan2.2", {}))
 
     for key, items in cfg.items():
         if key in {"wan2.1", "wan2.2"}:
             continue
+        print(f"Downloading {key}...", flush=True)
         for item in items:
             _download_file(item)
 

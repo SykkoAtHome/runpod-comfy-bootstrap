@@ -15,8 +15,11 @@ def ensure_comfyui() -> None:
 
 
 def main() -> None:
+    print("Installing ComfyUI...", flush=True)
     ensure_comfyui()
+    print("Installing custom nodes...", flush=True)
     custom_nodes.install_custom_nodes()
+    print("Downloading models...", flush=True)
     models.download_models()
 
 
