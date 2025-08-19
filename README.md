@@ -12,7 +12,12 @@ bootstrap script if you want to fetch them:
 ```bash
 export download_wan2_1=true  # WAN 2.1 models
 export download_wan2_2=true  # WAN 2.2 models
+# optionally limit WAN 2.2 downloads to specific files
+export WAN22_MODELS="file1.safetensors,file2.safetensors"
 ```
+
+If `WAN22_MODELS` is unset, all WAN 2.2 files are downloaded when
+`download_wan2_2=true`.
 
 Run `start.sh` to execute the bootstrap process.
 

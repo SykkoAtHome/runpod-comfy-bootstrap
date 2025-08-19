@@ -60,31 +60,32 @@ def _download_http(url: str, dest: Path, token: str | None) -> None:
                     pbar.update(len(chunk))
 
 
-def _download_file(item: dict) -> None:
+def _download_file(item: dict) -> bool:
     url = item["url"]
     target_dir = COMFY_MODELS_DIR / item["target_dir"]
     dest = target_dir / item["rename_to"]
     if dest.exists():
-        return
+        return True
     try:
         target_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as e:
-        print(f"Skipping download of {url}: cannot create directory {target_dir} (filesystem error: {e})", flush=True)
-        return
-    try:
         if url.startswith("hf://"):
             _download_hf(url, dest, os.getenv("HF_KEY"))
         else:
             token = os.getenv("CIVITAI_KEY") if "civitai" in url.lower() else None
             _download_http(url, dest, token)
-    except OSError as e:
-        print(f"Skipping download of {url} due to filesystem error (likely out of space): {e}", flush=True)
+        return True
+    except (OSError, RuntimeError) as e:
+        print(f"Skipping download of {url}: {e}", flush=True)
+        return False
 
 
-def _process_group(group: dict) -> None:
+def _process_group(group: dict) -> bool:
+    ok = True
     for items in group.values():
         for item in items:
-            _download_file(item)
+            if not _download_file(item):
+                ok = False
+    return ok
 
 
 def download_models() -> None:
@@ -93,20 +94,40 @@ def download_models() -> None:
     with CONFIG_FILE.open() as f:
         cfg = json.load(f)
 
+    had_errors = False
+
     if env_true("download_wan2_1"):
         print("Downloading wan2.1...", flush=True)
-        _process_group(cfg.get("wan2.1", {}))
+        if not _process_group(cfg.get("wan2.1", {})):
+            had_errors = True
 
     if env_true("download_wan2_2"):
         print("Downloading wan2.2...", flush=True)
-        _process_group(cfg.get("wan2.2", {}))
+        wan22 = cfg.get("wan2.2", {})
+        selected = os.getenv("WAN22_MODELS")
+        if selected:
+            names = {n.strip() for n in selected.split(",") if n.strip()}
+            filtered: dict[str, list[dict]] = {}
+            for group_name, items in wan22.items():
+                subset = [item for item in items if item["rename_to"] in names]
+                if subset:
+                    filtered[group_name] = subset
+            if not _process_group(filtered):
+                had_errors = True
+        else:
+            if not _process_group(wan22):
+                had_errors = True
 
     for key, items in cfg.items():
         if key in {"wan2.1", "wan2.2"}:
             continue
         print(f"Downloading {key}...", flush=True)
         for item in items:
-            _download_file(item)
+            if not _download_file(item):
+                had_errors = True
+
+    if had_errors:
+        raise RuntimeError("Disk quota exceeded")
 
 
 if __name__ == "__main__":
