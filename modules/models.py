@@ -11,6 +11,8 @@ from .utils import env_true
 
 CONFIG_FILE = Path(__file__).resolve().parent.parent / "config" / "models.json"
 COMFY_MODELS_DIR = Path("/workspace/ComfyUI/models")
+HF_CACHE_DIR = Path(os.getenv("HF_HOME", "/workspace/.cache/huggingface"))
+HF_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _download_hf(url: str, dest: Path, token: str | None) -> None:
@@ -18,7 +20,7 @@ def _download_hf(url: str, dest: Path, token: str | None) -> None:
     parts = repo_path.split("/", 2)
     repo_id = "/".join(parts[:2])
     file_path = parts[2]
-    downloaded = hf_hub_download(repo_id=repo_id, filename=file_path, token=token)
+    downloaded = hf_hub_download(repo_id=repo_id, filename=file_path, token=token, cache_dir=HF_CACHE_DIR)
     shutil.copy(downloaded, dest)
 
 
