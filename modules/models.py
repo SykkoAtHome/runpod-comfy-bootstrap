@@ -43,12 +43,14 @@ def _download_file(item: dict) -> None:
     dest = target_dir / item["rename_to"]
     if dest.exists():
         return
-
-    if url.startswith("hf://"):
-        _download_hf(url, dest, os.getenv("HF_KEY"))
-    else:
-        token = os.getenv("CIVITAI_KEY") if "civitai" in url.lower() else None
-        _download_http(url, dest, token)
+    try:
+        if url.startswith("hf://"):
+            _download_hf(url, dest, os.getenv("HF_KEY"))
+        else:
+            token = os.getenv("CIVITAI_KEY") if "civitai" in url.lower() else None
+            _download_http(url, dest, token)
+    except OSError as e:
+        print(f"Skipping download of {url} due to error: {e}", flush=True)
 
 
 def _process_group(group: dict) -> None:
