@@ -12,6 +12,10 @@ def ensure_comfyui() -> None:
         ["git", "clone", "https://github.com/comfyanonymous/ComfyUI", str(target)],
         check=True,
     )
+    subprocess.run(
+        ["pip", "install", "-r", str(target / "requirements.txt")],
+        check=True,
+    )
 
 
 def main() -> None:
