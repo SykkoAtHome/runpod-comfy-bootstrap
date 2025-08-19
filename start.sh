@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE="/workspace"
@@ -14,5 +14,9 @@ mkdir -p "$HF_HUB_CACHE"
 pip install --no-cache-dir -r "$SCRIPT_DIR/modules/requirements.txt" >/dev/null 2>&1
 
 # execute python bootstrap to install ComfyUI, custom nodes and models
-cd "$SCRIPT_DIR" && python -m modules.bootstrap
+cd "$SCRIPT_DIR"
+if ! python -m modules.bootstrap; then
+    echo "Bootstrap failed. Exiting." >&2
+fi
 
+exit 0

@@ -20,6 +20,7 @@ def install_custom_nodes() -> None:
             target = CUSTOM_NODES_DIR / repo_name
             if target.exists():
                 continue
+            print(f"Cloning {repo_name}...", flush=True)
             subprocess.run(["git", "clone", url, str(target)], check=True)
 
 
