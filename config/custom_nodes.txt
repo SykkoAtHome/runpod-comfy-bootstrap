@@ -1,4 +1,3 @@
-https://github.com/crystian/comfyui-crystools.git
 https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 https://github.com/kijai/ComfyUI-KJNodes.git
 https://github.com/chflame163/ComfyUI_LayerStyle.git
