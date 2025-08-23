@@ -13,10 +13,18 @@ mkdir -p "$HF_HUB_CACHE"
 # ensure required python dependencies are available
 pip install --no-cache-dir -r "$SCRIPT_DIR/modules/requirements.txt" >/dev/null 2>&1
 
-# execute python bootstrap to install ComfyUI, custom nodes and models
-cd "$SCRIPT_DIR"
-if ! python -m modules.bootstrap; then
-    echo "Bootstrap failed. Exiting." >&2
+# install ComfyUI
+if [ ! -d "$WORKSPACE/ComfyUI" ]; then
+    git clone https://github.com/comfyanonymous/ComfyUI "$WORKSPACE/ComfyUI"
 fi
+cd "$WORKSPACE/ComfyUI"
+pip install -r requirements.txt
+cd "$SCRIPT_DIR"
+
+# install custom nodes
+python -m modules.custom_nodes
+
+# download models
+python -m modules.models
 
 exit 0
