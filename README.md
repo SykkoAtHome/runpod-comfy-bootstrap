@@ -19,5 +19,11 @@ export WAN22_MODELS="file1.safetensors,file2.safetensors"
 If `WAN22_MODELS` is unset, all WAN 2.2 files are downloaded when
 `download_wan2_2=true`.
 
+To skip downloading any models regardless of the above flags, set:
+
+```bash
+export SKIP_MODELS_DOWNLOAD=true
+```
+
 Run `start.sh` to execute the bootstrap process.
 

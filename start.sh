@@ -25,6 +25,10 @@ cd "$SCRIPT_DIR"
 python -m modules.custom_nodes
 
 # download models
-python -m modules.models
+if [[ "${SKIP_MODELS_DOWNLOAD,,}" =~ ^(1|true|yes|y)$ ]]; then
+    echo "Skipping model downloads"
+else
+    python -m modules.models
+fi
 
 exit 0
