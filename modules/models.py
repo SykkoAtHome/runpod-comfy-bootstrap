@@ -89,6 +89,9 @@ def _process_group(group: dict) -> bool:
 
 
 def download_models() -> None:
+    if env_true("SKIP_MODELS_DOWNLOAD"):
+        print("Skipping model downloads", flush=True)
+        return
     if not CONFIG_FILE.exists():
         return
     with CONFIG_FILE.open() as f:
@@ -96,12 +99,17 @@ def download_models() -> None:
 
     had_errors = False
 
-    if env_true("download_wan2_1"):
+    wan21_enabled = env_true("download_wan2_1")
+    wan22_enabled = env_true("download_wan2_2")
+    if not (wan21_enabled or wan22_enabled):
+        print("WAN model downloads disabled", flush=True)
+
+    if wan21_enabled:
         print("Downloading wan2.1...", flush=True)
         if not _process_group(cfg.get("wan2.1", {})):
             had_errors = True
 
-    if env_true("download_wan2_2"):
+    if wan22_enabled:
         print("Downloading wan2.2...", flush=True)
         wan22 = cfg.get("wan2.2", {})
         selected = os.getenv("WAN22_MODELS")
