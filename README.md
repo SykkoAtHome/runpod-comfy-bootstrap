@@ -27,3 +27,41 @@ export SKIP_MODELS_DOWNLOAD=true
 
 Run `start.sh` to execute the bootstrap process.
 
+## Vast.ai ComfyUI template
+
+The Vast.ai bootstrap uses the preinstalled ComfyUI from the official
+`vastai/comfy` image. It downloads the required MiniMax H3 models and moves
+completed ComfyUI outputs to an S3-compatible Silo bucket.
+
+Use these template settings:
+
+```text
+PROVISIONING_SCRIPT=https://raw.githubusercontent.com/SykkoAtHome/runpod-comfy-bootstrap/main/vast-bootstrap.sh
+```
+
+Keep the On-start Script set to the image default:
+
+```bash
+entrypoint.sh
+```
+
+Do not create `/workspace/ComfyUI` in the On-start Script. The Vast.ai image
+copies its bundled ComfyUI installation to that location during first boot.
+
+Store only the following secrets in the Vast.ai account-level environment
+variables:
+
+```text
+RCLONE_CONFIG_SILO_ACCESS_KEY_ID
+RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY
+```
+
+The bootstrap uses `https://s3.tluchowski.pl`, bucket `comfy`, and prefix
+`output`. Every minute, files older than two minutes are moved from
+`/workspace/ComfyUI/output` to `silo:comfy/output`. A local file is removed
+only after rclone successfully transfers it.
+
+The four MiniMax H3 model files require approximately 100 GB. A 200 GB
+instance disk is recommended.
+
+
