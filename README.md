@@ -61,7 +61,5 @@ The bootstrap uses `https://s3.tluchowski.pl`, bucket `comfy`, and prefix
 `/workspace/ComfyUI/output` to `silo:comfy/output`. A local file is removed
 only after rclone successfully transfers it.
 
-The four MiniMax H3 model files require approximately 100 GB. A 200 GB
+The five MiniMax H3 model files require approximately 134 GB. A 200 GB
 instance disk is recommended.
-
-
