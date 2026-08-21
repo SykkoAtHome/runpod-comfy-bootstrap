@@ -20,6 +20,7 @@ MODEL_SPECS=(
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors|vae/minimax_h3_audio_vae_fp32.safetensors"
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors|vae/minimax_h3_video_vae_fp16.safetensors"
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_bf16.safetensors|diffusion_models/minimax_h3_ref2va_bf16.safetensors"
+    "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_int8_convrot.safetensors|diffusion_models/minimax_h3_ref2va_int8_convrot.safetensors"
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors|text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors"
 )
 
@@ -159,4 +160,3 @@ main() {
 }
 
 main "$@"
-
