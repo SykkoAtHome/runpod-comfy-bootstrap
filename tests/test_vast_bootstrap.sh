@@ -94,6 +94,7 @@ expected_models=(
     "$workspace/ComfyUI/models/vae/minimax_h3_audio_vae_fp32.safetensors"
     "$workspace/ComfyUI/models/vae/minimax_h3_video_vae_fp16.safetensors"
     "$workspace/ComfyUI/models/diffusion_models/minimax_h3_ref2va_bf16.safetensors"
+    "$workspace/ComfyUI/models/diffusion_models/minimax_h3_ref2va_int8_convrot.safetensors"
     "$workspace/ComfyUI/models/text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors"
 )
 
@@ -101,7 +102,7 @@ for model in "${expected_models[@]}"; do
     [[ -s "$model" ]] || fail "model was not installed: $model"
 done
 
-[[ "$(grep -c '^curl ' "$call_log")" -eq 4 ]] || fail "expected exactly four model downloads"
+[[ "$(grep -c '^curl ' "$call_log")" -eq 5 ]] || fail "expected exactly five model downloads"
 assert_contains "$call_log" "--continue-at -"
 assert_contains "$call_log" "rclone lsd silo:comfy"
 assert_contains "$cron_file" "rclone move $workspace/ComfyUI/output silo:comfy/output"
@@ -115,7 +116,6 @@ env \
     "RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY=test-secret-key" \
     bash "$bootstrap_script"
 
-[[ "$(grep -c '^curl ' "$call_log")" -eq 4 ]] || fail "existing models were downloaded again"
+[[ "$(grep -c '^curl ' "$call_log")" -eq 5 ]] || fail "existing models were downloaded again"
 
 echo "PASS: Vast bootstrap behavior"
-
