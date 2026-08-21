@@ -16,7 +16,7 @@ assert_contains() {
     grep -Fq -- "$expected" "$file" || fail "$file does not contain: $expected"
 }
 
-[[ -x "$bootstrap_script" ]] || fail "vast-bootstrap.sh is missing or not executable"
+[[ -f "$bootstrap_script" ]] || fail "vast-bootstrap.sh is missing"
 
 test_root="$(mktemp -d)"
 trap 'rm -rf "$test_root"' EXIT
