@@ -18,6 +18,8 @@ LOG_DIR="${LOG_DIR:-/var/log/portal}"
 
 APT_GET_BIN="${APT_GET_BIN:-apt-get}"
 CURL_BIN="${CURL_BIN:-curl}"
+GIT_BIN="${GIT_BIN:-git}"
+PYTHON_BIN="${PYTHON_BIN:-/venv/main/bin/python}"
 RCLONE_BIN="${RCLONE_BIN:-rclone}"
 SUPERVISORCTL_BIN="${SUPERVISORCTL_BIN:-supervisorctl}"
 
@@ -28,6 +30,9 @@ UPLOAD_INTERVAL_SECONDS="${UPLOAD_INTERVAL_SECONDS:-15}"
 COMFY_DIR="$WORKSPACE_DIR/ComfyUI"
 MODELS_DIR="$COMFY_DIR/models"
 OUTPUT_DIR="$COMFY_DIR/output"
+KJNODES_DIR="$COMFY_DIR/custom_nodes/ComfyUI-KJNodes"
+KJNODES_REPO="https://github.com/kijai/ComfyUI-KJNodes.git"
+KJNODES_INSTALLED=false
 
 MODEL_SPECS=(
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors|vae/minimax_h3_audio_vae_fp32.safetensors"
@@ -166,6 +171,21 @@ download_models() {
     fi
 }
 
+install_kjnodes() {
+    if [[ ! -d "$KJNODES_DIR" ]]; then
+        echo "Installing ComfyUI-KJNodes..."
+        mkdir -p "$(dirname "$KJNODES_DIR")"
+        "$GIT_BIN" clone --depth 1 "$KJNODES_REPO" "$KJNODES_DIR"
+        KJNODES_INSTALLED=true
+    else
+        echo "ComfyUI-KJNodes already present."
+    fi
+
+    if [[ -f "$KJNODES_DIR/requirements.txt" ]]; then
+        "$PYTHON_BIN" -m pip install -r "$KJNODES_DIR/requirements.txt"
+    fi
+}
+
 write_uploader() {
     mkdir -p "$(dirname "$UPLOADER_BIN")" "$OUTPUT_DIR" "$LOG_DIR"
     cat > "$UPLOADER_BIN" <<EOF
@@ -219,12 +239,20 @@ start_services() {
     "$SUPERVISORCTL_BIN" reread
     "$SUPERVISORCTL_BIN" update
     "$SUPERVISORCTL_BIN" restart comfy-s3-uploader
+    if [[ "$KJNODES_INSTALLED" == "true" ]]; then
+        "$SUPERVISORCTL_BIN" restart comfyui
+    fi
 }
 
 main() {
     require_root
     load_s3_credentials
     require_command "$CURL_BIN"
+    require_command "$GIT_BIN"
+    if [[ ! -x "$PYTHON_BIN" ]]; then
+        PYTHON_BIN="python"
+    fi
+    require_command "$PYTHON_BIN"
     require_command "$SUPERVISORCTL_BIN"
     [[ -d "$COMFY_DIR" ]] || {
         echo "ComfyUI directory not found: $COMFY_DIR" >&2
@@ -235,6 +263,7 @@ main() {
     require_command "$RCLONE_BIN"
     write_rclone_environment
     validate_s3_access
+    install_kjnodes
     download_models
     write_uploader
     write_supervisor_config

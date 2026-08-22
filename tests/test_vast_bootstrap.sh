@@ -56,6 +56,21 @@ set -euo pipefail
 printf '%s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
 EOF
 done
+
+cat > "$fake_bin/git" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'git %s\n' "$*" >> "$CALL_LOG"
+target="${@: -1}"
+mkdir -p "$target"
+printf 'package\n' > "$target/requirements.txt"
+EOF
+
+cat > "$fake_bin/python" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'python %s\n' "$*" >> "$CALL_LOG"
+EOF
 chmod +x "$fake_bin"/*
 
 partial_model="$workspace/ComfyUI/models/vae/minimax_h3_audio_vae_fp32.safetensors.part"
@@ -72,6 +87,8 @@ common_env=(
     "LOG_DIR=$log_dir"
     "APT_GET_BIN=$fake_bin/apt-get"
     "CURL_BIN=$fake_bin/curl"
+    "GIT_BIN=$fake_bin/git"
+    "PYTHON_BIN=$fake_bin/python"
     "RCLONE_BIN=$fake_bin/rclone"
     "SUPERVISORCTL_BIN=$fake_bin/supervisorctl"
     "CALL_LOG=$call_log"
@@ -104,9 +121,12 @@ done
 [[ "$(grep -c '^curl ' "$call_log")" -eq 5 ]] || fail "expected exactly five model downloads"
 assert_contains "$call_log" "--continue-at -"
 assert_contains "$call_log" "rclone lsd silo:comfy"
+assert_contains "$call_log" "git clone --depth 1 https://github.com/kijai/ComfyUI-KJNodes.git"
+assert_contains "$call_log" "python -m pip install -r"
 assert_contains "$call_log" "supervisorctl reread"
 assert_contains "$call_log" "supervisorctl update"
 assert_contains "$call_log" "supervisorctl restart comfy-s3-uploader"
+assert_contains "$call_log" "supervisorctl restart comfyui"
 
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_ACCESS_KEY_ID=test-user"
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY=test-password"
@@ -121,5 +141,7 @@ env "${common_env[@]}" \
     bash "$bootstrap_script"
 
 [[ "$(grep -c '^curl ' "$call_log")" -eq 5 ]] || fail "existing models were downloaded again"
+[[ "$(grep -c '^git clone ' "$call_log")" -eq 1 ]] || fail "KJNodes was cloned more than once"
+[[ "$(grep -c '^supervisorctl restart comfyui$' "$call_log")" -eq 1 ]] || fail "ComfyUI restarted without a new KJNodes install"
 
 echo "PASS: Vast ComfyUI bootstrap installs models and configures the S3 uploader"
