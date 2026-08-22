@@ -32,7 +32,6 @@ MODELS_DIR="$COMFY_DIR/models"
 OUTPUT_DIR="$COMFY_DIR/output"
 KJNODES_DIR="$COMFY_DIR/custom_nodes/ComfyUI-KJNodes"
 KJNODES_REPO="https://github.com/kijai/ComfyUI-KJNodes.git"
-KJNODES_INSTALLED=false
 
 MODEL_SPECS=(
     "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors|vae/minimax_h3_audio_vae_fp32.safetensors"
@@ -176,7 +175,6 @@ install_kjnodes() {
         echo "Installing ComfyUI-KJNodes..."
         mkdir -p "$(dirname "$KJNODES_DIR")"
         "$GIT_BIN" clone --depth 1 "$KJNODES_REPO" "$KJNODES_DIR"
-        KJNODES_INSTALLED=true
     else
         echo "ComfyUI-KJNodes already present."
     fi
@@ -239,9 +237,7 @@ start_services() {
     "$SUPERVISORCTL_BIN" reread
     "$SUPERVISORCTL_BIN" update
     "$SUPERVISORCTL_BIN" restart comfy-s3-uploader
-    if [[ "$KJNODES_INSTALLED" == "true" ]]; then
-        "$SUPERVISORCTL_BIN" restart comfyui
-    fi
+    "$SUPERVISORCTL_BIN" restart comfyui
 }
 
 main() {

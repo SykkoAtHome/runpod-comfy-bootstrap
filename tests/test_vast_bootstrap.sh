@@ -142,6 +142,6 @@ env "${common_env[@]}" \
 
 [[ "$(grep -c '^curl ' "$call_log")" -eq 5 ]] || fail "existing models were downloaded again"
 [[ "$(grep -c '^git clone ' "$call_log")" -eq 1 ]] || fail "KJNodes was cloned more than once"
-[[ "$(grep -c '^supervisorctl restart comfyui$' "$call_log")" -eq 1 ]] || fail "ComfyUI restarted without a new KJNodes install"
+[[ "$(grep -c '^supervisorctl restart comfyui$' "$call_log")" -eq 2 ]] || fail "ComfyUI was not restarted after each bootstrap"
 
 echo "PASS: Vast ComfyUI bootstrap installs models and configures the S3 uploader"

@@ -13,9 +13,8 @@
 - The Silo S3 signing region is `warsaw`; `us-east-1` causes an
   `AuthorizationHeaderMalformed` response.
 - The bootstrap installs ComfyUI-KJNodes, downloads MiniMax H3 models, validates
-  `silo:comfy`, and installs a Supervisor-managed rclone uploader. Model
-  downloads do not require a restart. Restart ComfyUI only when KJNodes is newly
-  cloned because Python custom nodes load at process startup.
+  `silo:comfy`, and installs a Supervisor-managed rclone uploader. Always
+  restart ComfyUI once at the end so Python custom-node changes are loaded.
 - The uploader moves files older than one minute from
   `/workspace/ComfyUI/output` to `silo:comfy/output` every 15 seconds.
 
