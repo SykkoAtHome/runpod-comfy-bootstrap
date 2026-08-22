@@ -44,9 +44,27 @@ require_root() {
     fi
 }
 
-require_environment() {
-    : "${S3_LOGIN:?Set S3_LOGIN to the Silo username}"
-    : "${S3_PASS:?Set S3_PASS to the Silo password}"
+read_secret() {
+    local prompt="$1"
+    local variable_name="$2"
+
+    if [[ "${NONINTERACTIVE:-false}" == "true" || ! -r /dev/tty ]]; then
+        echo "Set $variable_name or run the bootstrap in an interactive terminal." >&2
+        exit 1
+    fi
+
+    if [[ "$variable_name" == "S3_PASS" ]]; then
+        read -r -s -p "$prompt" "$variable_name" < /dev/tty
+        echo > /dev/tty
+    else
+        read -r -p "$prompt" "$variable_name" < /dev/tty
+    fi
+}
+
+load_s3_credentials() {
+    [[ -n "${S3_LOGIN:-}" ]] || read_secret "Silo login: " S3_LOGIN
+    [[ -n "${S3_PASS:-}" ]] || read_secret "Silo password: " S3_PASS
+    export S3_LOGIN S3_PASS
 }
 
 require_command() {
@@ -206,7 +224,7 @@ start_services() {
 
 main() {
     require_root
-    require_environment
+    load_s3_credentials
     require_command "$CURL_BIN"
     require_command "$SUPERVISORCTL_BIN"
     [[ -d "$COMFY_DIR" ]] || {

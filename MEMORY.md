@@ -8,7 +8,8 @@
   supported design keeps ComfyUI output local and moves completed files to S3.
 - `vast-bootstrap.sh` is run manually after the ComfyUI container starts.
 - Vast account secrets are named `S3_LOGIN` and `S3_PASS`; their values are the
-  Silo username and password.
+  Silo username and password. If Vast does not inject them into the running
+  shell, the bootstrap securely prompts for missing values through `/dev/tty`.
 - The bootstrap downloads MiniMax H3 models, validates `silo:comfy`, installs a
   Supervisor-managed rclone uploader, and restarts ComfyUI.
 - The uploader moves files older than one minute from

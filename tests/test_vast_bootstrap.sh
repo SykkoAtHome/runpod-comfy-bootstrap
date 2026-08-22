@@ -79,6 +79,7 @@ common_env=(
 )
 
 if env -u S3_PASS \
+    "NONINTERACTIVE=true" \
     "${common_env[@]}" bash "$bootstrap_script" > "$test_root/missing-secret.log" 2>&1; then
     fail "bootstrap succeeded without the Silo password"
 fi

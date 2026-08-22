@@ -40,6 +40,10 @@ S3_LOGIN=<SILO_USERNAME>
 S3_PASS=<SILO_PASSWORD>
 ```
 
+If either variable is unavailable inside the running container, the bootstrap
+prompts for it interactively. The password input is hidden and is not written
+to shell history.
+
 Allocate at least 200 GB of disk space. Start the instance, open its terminal,
 and run:
 
