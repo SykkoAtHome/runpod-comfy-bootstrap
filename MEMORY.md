@@ -13,7 +13,8 @@
 - The Silo S3 signing region is `warsaw`; `us-east-1` causes an
   `AuthorizationHeaderMalformed` response.
 - The bootstrap downloads MiniMax H3 models, validates `silo:comfy`, installs a
-  Supervisor-managed rclone uploader, and restarts ComfyUI.
+  Supervisor-managed rclone uploader, and leaves ComfyUI running. Refreshing
+  the model list is sufficient; do not restart ComfyUI after downloads.
 - The uploader moves files older than one minute from
   `/workspace/ComfyUI/output` to `silo:comfy/output` every 15 seconds.
 

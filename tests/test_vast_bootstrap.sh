@@ -107,7 +107,6 @@ assert_contains "$call_log" "rclone lsd silo:comfy"
 assert_contains "$call_log" "supervisorctl reread"
 assert_contains "$call_log" "supervisorctl update"
 assert_contains "$call_log" "supervisorctl restart comfy-s3-uploader"
-assert_contains "$call_log" "supervisorctl restart comfyui"
 
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_ACCESS_KEY_ID=test-user"
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY=test-password"

@@ -219,7 +219,6 @@ start_services() {
     "$SUPERVISORCTL_BIN" reread
     "$SUPERVISORCTL_BIN" update
     "$SUPERVISORCTL_BIN" restart comfy-s3-uploader
-    "$SUPERVISORCTL_BIN" restart comfyui
 }
 
 main() {

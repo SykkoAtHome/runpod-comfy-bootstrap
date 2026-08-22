@@ -58,7 +58,9 @@ The script performs the following steps:
 1. Validates access to `silo:comfy`.
 2. Downloads the five MiniMax H3 model files with retry and resume support.
 3. Installs a persistent `comfy-s3-uploader` Supervisor service.
-4. Restarts ComfyUI so the downloaded models are available immediately.
+
+Refresh the model list in ComfyUI after the downloads finish; the bootstrap
+does not restart the running ComfyUI process.
 
 ComfyUI writes to `/workspace/ComfyUI/output`. Every 15 seconds the uploader
 moves files older than one minute to `silo:comfy/output`. Files are removed
