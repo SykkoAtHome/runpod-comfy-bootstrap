@@ -201,16 +201,38 @@ S3_PREFIX=$(printf '%q' "$S3_PREFIX")
 UPLOAD_INTERVAL_SECONDS=$(printf '%q' "$UPLOAD_INTERVAL_SECONDS")
 
 mkdir -p "\$OUTPUT_DIR"
+upload_once() {
+    local file modified_at now relative_path remote_path
+    now="\$(date +%s)"
+
+    while IFS= read -r -d '' file; do
+        modified_at="\$(stat -c %Y "\$file")" || continue
+        ((now - modified_at >= 60)) || continue
+
+        relative_path="\${file#"\$OUTPUT_DIR"/}"
+        remote_path="silo:\$S3_BUCKET/\$S3_PREFIX/\$relative_path"
+        if "\$RCLONE_BIN" copyto "\$file" "\$remote_path" \
+            --retries 10 \
+            --low-level-retries 20 \
+            --log-file $(printf '%q' "$LOG_DIR/comfy-s3-uploader.log") \
+            --log-level INFO; then
+            rm -f -- "\$file"
+            echo "Uploaded and removed local file: \$relative_path"
+        else
+            echo "Upload failed; keeping local file: \$relative_path" >&2
+        fi
+    done < <(find "\$OUTPUT_DIR" -type f -print0)
+
+    find "\$OUTPUT_DIR" -depth -mindepth 1 -type d -empty -delete
+}
+
+if [[ "\${RUN_ONCE:-false}" == "true" ]]; then
+    upload_once
+    exit
+fi
+
 while true; do
-    "\$RCLONE_BIN" move "\$OUTPUT_DIR" "silo:\$S3_BUCKET/\$S3_PREFIX" \
-        --min-age 1m \
-        --delete-empty-src-dirs \
-        --transfers 4 \
-        --checkers 8 \
-        --retries 10 \
-        --low-level-retries 20 \
-        --log-file $(printf '%q' "$LOG_DIR/comfy-s3-uploader.log") \
-        --log-level INFO || true
+    upload_once
     sleep "\$UPLOAD_INTERVAL_SECONDS"
 done
 EOF

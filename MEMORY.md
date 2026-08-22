@@ -15,8 +15,9 @@
 - The bootstrap installs ComfyUI-KJNodes, downloads MiniMax H3 models, validates
   `silo:comfy`, and installs a Supervisor-managed rclone uploader. Always
   restart ComfyUI once at the end so Python custom-node changes are loaded.
-- The uploader moves files older than one minute from
-  `/workspace/ComfyUI/output` to `silo:comfy/output` every 15 seconds.
+- The uploader processes files older than one minute individually with
+  `rclone copyto`. It removes a local file only after that file's copy succeeds;
+  failed uploads stay local for retry. Do not replace this with `rclone move`.
 
 ## Verification
 

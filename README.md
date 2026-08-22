@@ -64,9 +64,9 @@ The bootstrap restarts ComfyUI once at the end so installed or updated Python
 custom nodes are loaded reliably.
 
 ComfyUI writes to `/workspace/ComfyUI/output`. Every 15 seconds the uploader
-moves files older than one minute to `silo:comfy/output`. Files are removed
-locally only after rclone transfers them successfully. Check status and logs
-with:
+copies each file older than one minute to `silo:comfy/output`. A local file is
+removed individually only when its `rclone copyto` operation succeeds. Failed
+uploads remain local and are retried. Check status and logs with:
 
 ```bash
 supervisorctl status comfy-s3-uploader comfyui

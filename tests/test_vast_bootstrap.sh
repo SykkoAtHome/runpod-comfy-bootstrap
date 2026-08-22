@@ -54,6 +54,9 @@ for command_name in apt-get rclone supervisorctl; do
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
+if [[ "$(basename "$0")" == "rclone" && "${1:-}" == "copyto" && "${FAIL_COPYTO:-false}" == "true" ]]; then
+    exit 1
+fi
 EOF
 done
 
@@ -131,10 +134,27 @@ assert_contains "$call_log" "supervisorctl restart comfyui"
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_ACCESS_KEY_ID=test-user"
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY=test-password"
 assert_contains "$rclone_env_file" "RCLONE_CONFIG_SILO_REGION=warsaw"
-assert_contains "$uploader_bin" 'move "$OUTPUT_DIR" "silo:$S3_BUCKET/$S3_PREFIX"'
-assert_contains "$uploader_bin" "--min-age 1m"
+assert_contains "$uploader_bin" 'copyto "$file" "$remote_path"'
+assert_contains "$uploader_bin" 'rm -f -- "$file"'
+if grep -Fq -- 'rclone move' "$uploader_bin"; then
+    fail "uploader still uses rclone move"
+fi
 assert_contains "$supervisor_config" "[program:comfy-s3-uploader]"
 assert_contains "$supervisor_config" "command=$uploader_bin"
+
+successful_output="$workspace/ComfyUI/output/success.png"
+mkdir -p "$(dirname "$successful_output")"
+printf 'image\n' > "$successful_output"
+touch -d '2 minutes ago' "$successful_output"
+env "CALL_LOG=$call_log" "RUN_ONCE=true" bash "$uploader_bin"
+[[ ! -e "$successful_output" ]] || fail "successfully uploaded file was not removed locally"
+assert_contains "$call_log" "rclone copyto $successful_output silo:comfy/output/success.png"
+
+failed_output="$workspace/ComfyUI/output/failed.png"
+printf 'image\n' > "$failed_output"
+touch -d '2 minutes ago' "$failed_output"
+env "CALL_LOG=$call_log" "RUN_ONCE=true" "FAIL_COPYTO=true" bash "$uploader_bin"
+[[ -e "$failed_output" ]] || fail "failed upload was removed locally"
 
 env "${common_env[@]}" \
     "S3_PASS=test-password" \
