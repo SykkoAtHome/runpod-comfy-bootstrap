@@ -91,7 +91,7 @@ write_rclone_environment() {
         printf 'RCLONE_CONFIG_SILO_TYPE=%q\n' "s3"
         printf 'RCLONE_CONFIG_SILO_PROVIDER=%q\n' "Minio"
         printf 'RCLONE_CONFIG_SILO_ENDPOINT=%q\n' "https://s3.tluchowski.pl"
-        printf 'RCLONE_CONFIG_SILO_REGION=%q\n' "us-east-1"
+        printf 'RCLONE_CONFIG_SILO_REGION=%q\n' "warsaw"
         printf 'RCLONE_CONFIG_SILO_FORCE_PATH_STYLE=%q\n' "true"
         printf 'RCLONE_CONFIG_SILO_ACCESS_KEY_ID=%q\n' "$S3_LOGIN"
         printf 'RCLONE_CONFIG_SILO_SECRET_ACCESS_KEY=%q\n' "$S3_PASS"
